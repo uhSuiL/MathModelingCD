@@ -119,5 +119,3 @@ def solve(
     status = prob.solve(pulp.PULP_CBC_CMD(msg=False))
     print(pulp.LpStatus[status])
     return prob
-
-def constraint_1():
