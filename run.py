@@ -7,7 +7,7 @@ if __name__ == '__main__':
         list(range(len(tanker_types))),
         list(range(len(route))),
         list(range(len(demand_point))),
-        chemicals,
+        list(range(len(chemicals))),
         N,
         L,
         H,
