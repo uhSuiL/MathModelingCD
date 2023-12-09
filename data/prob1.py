@@ -2,7 +2,7 @@ import numpy as np
 
 
 chemicals = ['Acid', 'Caustic']
-tanker_type = ['A', 'B', 'C', 'D']
+tanker_types = ['A', 'B', 'C']
 demand_point = [1, 2, 3, 4, 5, 6, 7, '8_a', '8_b', '8_c', 9]
 route = [
     (9, 5, 9),
@@ -25,7 +25,7 @@ route = [
 ]  # len = 17
 
 # num of tankers: N[t]
-N = [1, 5, 6, 0]
+N = [1, 5, 6]
 
 # length of routes(km): L[r]
 L = [260, 450, 480, 340, 355, 370, 515, 550, 840, 770, 820, 435, 305, 340, 355, 340, 355]
@@ -73,16 +73,16 @@ C = [
     [(16, 0) for j in range(N[0])],
     [(0, 16) for j in range(N[1])],
     [(6, 16) for j in range(N[2])],
-    [(16, 6) for j in range(N[3])],
-]  # shape: (4, N[t], 2)
+    # [(16, 6) for j in range(N[3])],
+]  # shape: (3, N[t], 2)
 
 # num of virtual tankers for tanker[t, k]
 V = [
     [200] * N[0],
     [200] * N[1],
     [200] * N[2],
-    [200] * N[3],
-]  # shape: (4, N[t])
+    # [200] * N[3],
+]  # shape: (3, N[t])
 
 # demand for each chemical of each demand point: D[a][m]
 D = [
@@ -102,14 +102,14 @@ D = [
 # =================== Shape Check ===================
 
 assert len(chemicals) == 2, len(chemicals)
-assert len(tanker_type) == len(N) == 4, (len(tanker_type), len(N))
+assert len(tanker_types) == len(N) == 3, (len(tanker_types), len(N))
 assert len(demand_point) == 11, len(demand_point)
 assert len(route) == len(H) == len(L) == 17, (len(route), len(H), len(L))
 # assert np.array(I).shape == (17, 11), np.array(I).shape
 assert J.shape == (17, 11, 11), J.shape
 assert np.array(W).shape == (11, 2), np.array(W).shape
-assert len(C) == 4, len(C)
-assert len(V) == 4, len(V)
+assert len(C) == 3, len(C)
+assert len(V) == 3, len(V)
 assert np.array(D).shape == (11, 2), np.array(D).shape
 
 print(f"{__name__} Shape Check Pass")

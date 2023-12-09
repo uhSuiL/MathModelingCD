@@ -9,7 +9,7 @@ def solve(
         N,
         L,
         H,
-        I,
+        # I,
         J,
         W,
         C,
@@ -70,7 +70,7 @@ def solve(
                         for b in demand_point:
                             for m in chemicals:
                                 model.addConstr(
-                                    x[t][k][n][r][a][b][m] <= C[t][k][n] * z[t][k][n][r] * I[r][a] * I[r][b] * J[a][b],
+                                    x[t][k][n][r][a][b][m] <= C[t][k][n] * z[t][k][n][r] * J[a][b],
                                     name="C3"
                                 )
 
@@ -102,3 +102,7 @@ def solve(
                 sum([z[t][k][n][r] * H[r] for r in route for n in V[t][k]]) <= 5240,
                 name="C6"
             )
+
+    model.update()
+    model.optimize()
+    return model, x, y, z
