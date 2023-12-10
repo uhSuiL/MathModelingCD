@@ -1,3 +1,5 @@
+import pickle
+
 import gurobipy as gp
 
 
@@ -15,6 +17,7 @@ def solve(
         C,
         V,
         D,
+        info
 ):
     model = gp.Model()
 
@@ -64,6 +67,9 @@ def solve(
         for t in tanker_types
     ]
 
+    model.update()
+    print("decision variables added")
+
     # objective
     model.setObjective(
         1000 * sum([y[t][k]
@@ -71,16 +77,19 @@ def solve(
         0.36 * sum([z[t][k][n][r] * L[r]
                     for t in tanker_types for k in range(N[t]) for n in range(V[t][k]) for r in route])
     )
+    print("objective added")
 
     # constraints
     for t in tanker_types:
         for k in range(N[t]):
-            for n in chemicals:
-                model.addConstr(sum([z[t][k][n][r] for r in route]) <= 1, name="C1")
+            for n in range(V[t][k]):
+                model.addConstr(sum([z[t][k][n][r] for r in route]) <= 1)
+    print("constraint1 added")
 
     for t in tanker_types:
         for k in range(N[t]):
-            model.addConstr(sum([z[t][k][n][r] for r in route for n in range(V[t][k])]) <= y[t][k] * V[t][k], name="C2")
+            model.addConstr(sum([z[t][k][n][r] for r in route for n in range(V[t][k])]) <= y[t][k] * V[t][k])
+    print("constraint2 added")
 
     for t in tanker_types:
         for k in range(N[t]):
@@ -90,9 +99,9 @@ def solve(
                         for b in demand_point:
                             for m in chemicals:
                                 model.addConstr(
-                                    x[t][k][n][r][a][b][m] <= C[t][k][m] * z[t][k][n][r] * J[a][b],
-                                    name="C3"
+                                    x[t][k][n][r][a][b][m] <= C[t][k][m] * z[t][k][n][r] * J[r][a][b],
                                 )
+    print("constraint3 added")
 
     for b in demand_point:
         for m in chemicals:
@@ -100,8 +109,8 @@ def solve(
                 sum([x[t][k][n][r][a][b][m] for t in tanker_types for k in range(N[t]) for r in route for n in range(V[t][k]) for a in demand_point])
                 - sum([x[t][k][n][r][b][c][m] for t in tanker_types for k in range(N[t]) for r in route for n in range(V[t][k]) for c in demand_point])
                 == D[b][m],
-                name="C4"
             )
+    print("constraint4 added")
 
     for t in tanker_types:
         for k in range(N[t]):
@@ -113,16 +122,21 @@ def solve(
                                 sum([x[t][k][n][r][a][b][m] for a in demand_point])
                                 - sum([x[t][k][n][r][b][c][m] for c in demand_point])
                                 <= W[b][m],
-                                name="C5"
                             )
 
     for t in tanker_types:
         for k in range(N[t]):
             model.addConstr(
                 sum([z[t][k][n][r] * H[r] for r in route for n in range(V[t][k])]) <= 5240,
-                name="C6"
             )
+    print("constraints added")
 
     model.update()
     model.optimize()
+    print("finish solving")
+
+    # with open('./data/gurobi_model.pkl', 'wb') as f:
+    #     pickle.dump(model, f)
+
+    model.write(f'./data/gurobi_model[{info}].zip')
     return model, x, y, z
