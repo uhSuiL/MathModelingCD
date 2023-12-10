@@ -40,5 +40,5 @@ if __name__ == '__main__':
 		C,
 		V,
 		D,
-		f'v_tk=700<{datetime.now().strftime("%Y-%m-%d(%H:%M:%S)")}>'
+		f'v_tk=700@{datetime.now().strftime("%Y-%m-%d(%H:%M:%S)")}'
 	)
