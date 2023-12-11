@@ -27,7 +27,7 @@ if __name__ == '__main__':
 	#     D,
 	# )
 
-	model, x, y = gurobi_prob1.solve(
+	model, x, y, z = gurobi_prob1.solve(
 		tanker_types,
 		route,
 		demand_point,
