@@ -32,33 +32,40 @@ def solve(
     print("x added")
 
     y = model.addVars((
-        (m, a, b)
+        (m, r, a, b)
         for m in chemicals
+        for r in routes
         for a in demand_points
         for b in demand_points
     ), lb=0, vtype=gp.GRB.CONTINUOUS, name='y')
     print("y added")
 
+    z = model.addVars((
+        k
+        for k in tanker_types
+    ), lb=0, vtype=gp.GRB.INTEGER, name='z')
+    print("z added")
+
     print("=================== Decision Variables Added ===================")
     print("======================= Setting Objective =======================")
 
     model.setObjective(
-        1000 * sum(x[k, r] for k in tanker_types for r in routes)
+        1000 * sum(z[k] for k in tanker_types)
         + 0.36 * sum(L[r] * x[k, r] for k in tanker_types for r in routes)
-    )
+    , sense=gp.GRB.MINIMIZE)
 
     print("========================= Objective Set =========================")
     print("======================= Adding Constraints =======================")
 
-    # model.addConstrs((
-    #     sum(x[k, r] for r in routes) <= N[k]
-    #     for k in tanker_types
-    # ), name='C0')
-    # print("C0 added")
+    model.addConstrs((
+        z[k] <= N[k]
+        for k in tanker_types
+    ), name='C0')
+    print("C0 added")
 
     model.addConstrs((
-        sum(y[m, a, b] * J[r][a][b] for r in routes for a in demand_points)
-        - sum(y[m, b, c] * J[r][b][c] for r in routes for c in demand_points)
+        sum(y[m, r, a, b] * J[r][a][b] for r in routes for a in demand_points)
+        - sum(y[m, r, b, c] * J[r][b][c] for r in routes for c in demand_points)
         == D[b][m]
         for b in demand_points
         for m in chemicals
@@ -103,6 +110,7 @@ def solve(
     model.optimize()
 
     write_model(f'./output/{__name__}/{info}/{__name__}[{info}]', model)
+    model.display()
 
 
 def write_model(path: str, model):
