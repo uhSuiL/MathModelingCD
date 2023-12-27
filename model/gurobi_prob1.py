@@ -27,7 +27,7 @@ def solve(
 
     # decision variables
     # shape: (len(tanker_types), len(range(N[t]))) -- y[t][k]
-    y = model.addVars([(t, k) for t in tanker_types for k in range(N[t])], vtype=gp.GRB.BINARY) # , name="y")
+    y = model.addVars([(t, k) for t in tanker_types for k in range(N[t])], vtype=gp.GRB.BINARY, name="y")
     print("y added")
 
     z = model.addVars([
@@ -36,7 +36,7 @@ def solve(
         for k in range(N[t])
         for n in range(V[t][k])
         for r in route
-    ], vtype=gp.GRB.BINARY) # , name='z')
+    ], vtype=gp.GRB.BINARY, name='z')
     print("z added")
 
     x = model.addVars([
@@ -48,7 +48,7 @@ def solve(
         for a in demand_point
         for b in demand_point
         for m in chemicals
-    ], vtype=gp.GRB.CONTINUOUS, lb=0) # , name='x')
+    ], vtype=gp.GRB.CONTINUOUS, lb=0, name='x')
     print("x added")
 
     model.update()
@@ -83,14 +83,14 @@ def solve(
     print("constraint1 added")
 
     model.addConstrs((
-        sum([z[t, k, n, r] for r in route for n in range(V[t][k])]) <= y[t, k] * V[t][k]
+        sum([z[t, k, n, r] for r in route for n in range(V[t][k])]) - y[t, k] * V[t][k] <= 0
         for t in tanker_types
         for k in range(N[t])
     ), name="C2")
     print("constraint2 added")
 
     model.addConstrs((
-        x[t, k, n, r, a, b, m] <= C[t][k][m] * z[t, k, n, r] * J[r][a][b]
+        x[t, k, n, r, a, b, m] - C[t][k][m] * z[t, k, n, r] * J[r][a][b] <= 0
         for t in tanker_types
         for k in range(N[t])
         for r in route

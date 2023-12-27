@@ -78,26 +78,30 @@ C = [
 
 # num of virtual tankers for tanker[t, k]
 V = [
-    [700] * N[0],
-    [700] * N[1],
-    [700] * N[2],
+    [1000] * N[0],
+    [1000] * N[1],
+    [1000] * N[2],
     # [200] * N[3],
 ]  # shape: (3, N[t])
 
 # demand for each chemical of each demand point: D[a][m]
-D = [
+D = np.array([
     [6000, 0],
     [2500, 0],
     [6000, 0],
     [1000, 0],
-    [13000, 0],
+    [13000, 0],  # start for caustic
     [5000, 0],
     [2000, 0],
     [4000, 0],
     [1000, 0],
     [2000, 0],
-    [0, 60000],
-]  # shape: (11, 2)
+    [0, 60000],  # start for acidic
+])  # shape: (11, 2)
+
+D[4, 1] = - np.sum(D[:, 1])
+D[10, 0] = - np.sum(D[:, 0])
+
 
 # =================== Shape Check ===================
 
@@ -110,6 +114,6 @@ assert J.shape == (17, 11, 11), J.shape
 assert np.array(W).shape == (11, 2), np.array(W).shape
 assert len(C) == 3, len(C)
 assert len(V) == 3, len(V)
-assert np.array(D).shape == (11, 2), np.array(D).shape
+assert D.shape == (11, 2), D.shape
 
 print(f"{__name__} Shape Check Pass")
